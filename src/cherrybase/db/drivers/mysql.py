@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
+from __future__ import absolute_import
 
 from ..base import ThreadedPool, ShortcutsMixin
-from MySQLdb.connections import Connection
-from MySQLdb.cursors import DictCursor
-from MySQLdb import MySQLError
+from mysql.connector import MySQLConnection as Connection
+from mysql.connector.cursor import MySQLCursorDict as DictCursor
+from mysql.connector.errors import Error as MySQLError
+
 import os
 
 
@@ -13,12 +15,11 @@ class _Connection (Connection, ShortcutsMixin):
 
     def __init__ (self, *args, **kwargs):
         super (_Connection, self).__init__ (*args, **kwargs)
-        self.query ('set WAIT_TIMEOUT=%d' % 31536000 if os.name == 'posix' else 2147483)
-        self.store_result ()
+        self.cmd_query ('set WAIT_TIMEOUT=%d' % 31536000 if os.name == 'posix' else 2147483)
 
     def is_connected (self):
         try:
-            self.ping ()
+            self.cmd_ping ()
             return True
         except MySQLError:
             return False
